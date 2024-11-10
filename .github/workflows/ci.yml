@@ -12,8 +12,8 @@ on:
 
 # Environment variables used across jobs
 env:
-  BACKEND_IMAGE: vijay7823/backend-image
-  FRONTEND_IMAGE: vijay7823/frontend-image
+  BACKEND_IMAGE: vijay7823/backend-image    # Change to your Docker Hub username
+  FRONTEND_IMAGE: vijay7823/frontend-image   # Change to your Docker Hub username
 
 jobs:
   build:
@@ -28,6 +28,7 @@ jobs:
         id: version
         run: |
           echo "VERSION=v$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "version=${{ env.VERSION }}" >> $GITHUB_OUTPUT
 
       # Step 3: Build backend image
       - name: Build Backend
@@ -55,4 +56,3 @@ jobs:
           docker push ${{ env.BACKEND_IMAGE }}:latest
           docker push ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }}
           docker push ${{ env.FRONTEND_IMAGE }}:latest
-
