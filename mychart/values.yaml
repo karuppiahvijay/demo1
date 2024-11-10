@@ -17,12 +17,12 @@ global:
 dev:
   replicas: 1
   frontend:
-    imageTag: "latest-dev1"
+    imageTag: "latest"
     service:
       type: NodePort
       nodePort: 30827
   backend:
-    imageTag: "latest-dev"
+    imageTag: "latest"
     service:
       type: ClusterIP
     env:
@@ -43,12 +43,12 @@ dev:
 staging:
   replicas: 1
   frontend:
-    imageTag: "latest-staging"
+    imageTag: "latest"
     service:
       type: NodePort
       nodePort: 30003
   backend:
-    imageTag: "latest-staging"
+    imageTag: "latest"
     service:
       type: ClusterIP
     env:
