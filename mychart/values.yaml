@@ -1,0 +1,67 @@
+# values.yaml
+
+# Common configurations
+global:
+  imageRegistry: "docker.io"
+  environment: ""  # Set this to "dev" or "staging" when deploying
+  postgres:
+    image: "postgres:13"
+  backend:
+    image: "vijay7823/backend-image"
+    port: 3000
+  frontend:
+    image: "vijay7823/frontend-image"
+    port: 80
+
+# Development environment configurations
+dev:
+  replicas: 1
+  frontend:
+    imageTag: "latest-dev1"
+    service:
+      type: NodePort
+      nodePort: 30827
+  backend:
+    imageTag: "latest-dev"
+    service:
+      type: ClusterIP
+    env:
+      NODE_ENV: "development"
+      PGUSER: "postgres"
+      PGPASSWORD: "password"
+      PGDATABASE: "people"
+      PGHOST: "myapp-dev-postgres"
+      PGPORT: "5432"
+  postgres:
+    replicaCount: 1
+    credentials:
+      username: "postgres"
+      password: "password"
+      database: "people"
+
+# Staging environment configurations
+staging:
+  replicas: 1
+  frontend:
+    imageTag: "latest-staging"
+    service:
+      type: NodePort
+      nodePort: 30003
+  backend:
+    imageTag: "latest-staging"
+    service:
+      type: ClusterIP
+    env:
+      NODE_ENV: "staging"
+      PGUSER: "stagingpostgres"
+      PGPASSWORD: "password"
+      PGDATABASE: "people"
+      PGHOST: "myapp-staging-postgres"
+      PGPORT: "5432"
+  postgres:
+    replicaCount: 1
+    credentials:
+      username: "stagingpostgres"
+      password: "password"
+      database: "people"
+
