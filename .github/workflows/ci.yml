@@ -39,8 +39,9 @@ jobs:
       # Step 4: Build frontend image
       - name: Build Frontend
         run: |
-          docker build -t ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }} ./frontend
-          docker tag ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }} ${{ env.FRONTEND_IMAGE }}:latest
+         docker build -t ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }} ./frontend
+         docker tag ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }} ${{ env.FRONTEND_IMAGE }}:latest
+
 
       # Step 5: Login to Docker Hub
       - name: Login to Docker Hub
