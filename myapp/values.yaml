@@ -1,0 +1,50 @@
+# Backend configuration
+backend:
+  replicaCount: 1
+  image:
+    repository: vijay7823/backend-image
+    tag: latest  # This will be automatically updated by CD pipeline
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  labels:
+    version: "1.0.0"  # Make sure version is defined under backend.labels
+
+  env:
+    PGUSER: "postgres"
+    PGPASSWORD: "password"
+    PGDATABASE: "people"
+    PGHOST: "myapp-mychart-postgres-service"  # Ensure this matches the actual service name for PostgreSQL
+    PGPORT: "5432"
+
+# Frontend configuration
+frontend:
+  replicaCount: 1
+  image:
+    repository: vijay7823/frontend-image
+    tag: latest  # This will be automatically updated by CD pipeline
+    pullPolicy: IfNotPresent
+  service:
+    type: NodePort
+    port: 80
+    nodePort: 30001
+    targetPort: 80
+  labels:
+    version: "1.0.0"  # Make sure version is defined under frontend.labels
+
+# PostgreSQL configuration
+postgres:
+  image:
+    repository: postgres
+    tag: "13"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 5432
+  env:
+    POSTGRES_USER: "postgres"
+    POSTGRES_PASSWORD: "password"
+    POSTGRES_DB: "people"
+

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "myapp.fullname" . }}-backend
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "myapp.selectorLabels" . | nindent 6 }}
+      app: backend
+  template:
+    metadata:
+      labels:
+        {{- include "myapp.selectorLabels" . | nindent 8 }}
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: 3000  # Directly define the port here
+          env:
+            - name: PGUSER
+              value: {{ .Values.backend.env.PGUSER | quote }}
+            - name: PGPASSWORD
+              value: {{ .Values.backend.env.PGPASSWORD | quote }}
+            - name: PGDATABASE
+              value: {{ .Values.backend.env.PGDATABASE | quote }}
+            - name: PGHOST
+              value: {{ .Values.backend.env.PGHOST | quote }}
+            - name: PGPORT
+              value: {{ .Values.backend.env.PGPORT | quote }}
+
