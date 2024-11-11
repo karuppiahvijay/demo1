@@ -1,10 +1,13 @@
 const express = require('express');
+const cors = require('cors');  // This line imports the cors module
 const { Pool } = require('pg');
 const dns = require('dns').promises;
 const net = require('net');
 
 const app = express();
 const port = 3000;
+
+app.use(cors());
 
 // Log all environment variables
 console.log('Environment variables:');
