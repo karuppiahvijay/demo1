@@ -25,15 +25,16 @@ jobs:
         with:
           node-version: '16'
 
+      # Ensure we are in the correct working directory for frontend and backend
       - name: Install dependencies and build frontend
-        working-directory: ./frontend
         run: |
+          cd frontend
           npm install
           npm run build
 
       - name: Install dependencies and build backend
-        working-directory: ./backend
         run: |
+          cd backend
           npm install
           npm test # Run tests for the backend if any
 
