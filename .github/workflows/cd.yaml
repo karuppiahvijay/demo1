@@ -1,57 +1,37 @@
-name: CI/CD Pipeline
+# Name of the deployment workflow
+name: CD
 
+# Trigger CD after CI workflow completes
 on:
-  push:
-    branches:
-      - dev
-      - staging
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
 
 jobs:
-  build-and-deploy:
-    # Use self-hosted runner
-    runs-on: [self-hosted, ubuntu-latest]
-
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
+      # Step 1: Check out the code
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      # Build frontend and backend Docker images
-      - name: Build and Tag Images
+      # Step 2: Get version from git commit
+      - name: Get Version
+        id: version
         run: |
-          docker build -t ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }} -t ${{ env.FRONTEND_IMAGE }}:latest ./frontend
-          docker build -t ${{ env.BACKEND_IMAGE }}:${{ env.VERSION }} -t ${{ env.BACKEND_IMAGE }}:latest ./backend
+          echo "VERSION=v$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Push Images
+      # Step 3: Update Helm values with new image versions
+      - name: Update Helm Values
         run: |
-          docker push ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }}
-          docker push ${{ env.FRONTEND_IMAGE }}:latest
-          docker push ${{ env.BACKEND_IMAGE }}:${{ env.VERSION }}
-          docker push ${{ env.BACKEND_IMAGE }}:latest
+          cd myapp
+          yq eval ".backend.image.tag = \"${{ env.VERSION }}\"" -i values.yaml
+          yq eval ".frontend.image.tag = \"${{ env.VERSION }}\"" -i values.yaml
 
-      # Setup kubectl on self-hosted runner
-      - name: Install kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-
-      - name: Configure Kubernetes
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
-
-      # Deploy to Kubernetes using Helm
+      # Step 4: Deploy using Helm
       - name: Deploy to Kubernetes
         run: |
-          if [[ $GITHUB_REF == refs/heads/dev ]]; then
-            helm upgrade --install myapp ./mychart -f values.yaml --set global.environment=dev
-          elif [[ $GITHUB_REF == refs/heads/staging ]]; then
-            helm upgrade --install myapp ./mychart -f values.yaml --set global.environment=staging
-          fi
+          helm upgrade --install myapp ./myapp
 
