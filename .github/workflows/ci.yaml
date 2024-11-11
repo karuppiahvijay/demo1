@@ -1,0 +1,64 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  BACKEND_IMAGE: vijay7823/backend-image
+  FRONTEND_IMAGE: vijay7823/frontend-image
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies and build frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Install dependencies and build backend
+        working-directory: ./backend
+        run: |
+          npm install
+          npm test # Run tests for the backend if any
+
+      # Generate a version tag from the latest Git commit hash
+      - name: Generate Version Tag
+        id: version
+        run: |
+          echo "VERSION=v$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        continue-on-error: false
+
+      - name: Build and Tag Docker Images
+        run: |
+          docker build -t ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }} -t ${{ env.FRONTEND_IMAGE }}:latest ./frontend
+          docker build -t ${{ env.BACKEND_IMAGE }}:${{ env.VERSION }} -t ${{ env.BACKEND_IMAGE }}:latest ./backend
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker Images
+        run: |
+          docker push ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }}
+          docker push ${{ env.FRONTEND_IMAGE }}:latest
+          docker push ${{ env.BACKEND_IMAGE }}:${{ env.VERSION }}
+          docker push ${{ env.BACKEND_IMAGE }}:latest
+

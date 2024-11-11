@@ -20,7 +20,7 @@ dev:
     imageTag: "latest"
     service:
       type: NodePort
-      nodePort: 30827
+      nodePort: 30005
   backend:
     imageTag: "latest"
     service:
