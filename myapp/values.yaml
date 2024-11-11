@@ -28,7 +28,7 @@ frontend:
   service:
     type: NodePort
     port: 80
-    nodePort: 30001
+    nodePort: 30005
     targetPort: 80
   labels:
     version: "1.0.0"  # Make sure version is defined under frontend.labels
