@@ -33,5 +33,5 @@ jobs:
       # Step 4: Deploy using Helm
       - name: Deploy to Kubernetes
         run: |
-          helm upgrade --install myapp .
+          helm upgrade --install myapp ./myapp
 
